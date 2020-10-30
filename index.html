@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            /* margin: 0; */
+            /* padding: 0; */
+        }
+    </style>
+</head>
+<body>
+    <canvas id="game" width="600px" height="400px"></canvas>
+    
+    <script>
+        window.onload = function() {
+            let canvas = document.querySelector('#game');
+            let context = canvas.getContext('2d');
+            // Oyun alanı
+            const drawRect = (x,y,w,h,color) => {
+                context.fillStyle = color;
+                context.fillRect(x,y,w,h);
+            }
+            // drawRect(0,0,600,400,"green")
+            const drawCircleF= (x,y,r,color) => {
+                context.fillStyle=color;
+                context.beginPath();
+                context.arc(x,y,r,0,2 * Math.PI,false);
+                context.closePath();
+                context.fill();
+            }
+            const drawCircleS= (x,y,r,w,color) => {
+                context.strokeStyle=color;
+                context.lineWidth = w;
+                context.beginPath();
+                context.arc(x,y,r,0,2 * Math.PI);
+                context.closePath();
+                context.stroke();
+            }
+            const drawText = (text,x,y,color) => {
+                context.fillStyle = color;
+                context.font = "50px arial";
+                context.fillText(text,x,y);
+            }
+
+            const user = {
+                x:20,
+                y:200-50,
+                w:10,
+                h:100,
+                color:"white",
+                score : 0
+            }
+            const comp = {
+                x: canvas.width - 30,
+                y: 200-50,
+                w:10,
+                h:100,
+                color:"white",
+                score : 0,
+               
+            }
+
+            const ball = {
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                r:13,
+                color: "#ff0000",
+                speed: 5,
+                velocityX : 3,
+                velocityY : 4,
+                stop : true,
+            }
+            const movePaddle = (e) => {
+                let rect = canvas.getBoundingClientRect();
+                user.y = e.clientY - rect.top - user.h/2
+                ball.stop = false
+
+            }
+            canvas.addEventListener('mousemove',movePaddle)
+            
+            const collision = (b,p) => {
+                b.top = b.y - b.r
+                b.bottom = b.y +  b.r
+                b.left = b.x -  b.r
+                b.right = b.x +  b.r
+
+                p.top = p.y
+                p.bottom = p.y + p.h
+                p.left = p.x
+                p.right = p.x + p.w
+
+                return (b.top < p.bottom && b.bottom > p.top && b.left < p.right && b.right > p.left)
+            }
+
+            const resetBall = ()=> {
+                ball.x = canvas.width/2
+                ball.y = canvas.height/2
+                ball.speed = 5
+                ball.velocityX = 3
+                ball.velocityY = 4
+                ball.stop = true
+            }
+            const update = () =>{
+                if(!ball.stop){
+                    ball.x += ball.velocityX
+                    ball.y += ball.velocityY
+                }
+
+                let player = (ball.x < canvas.width / 2) ? user : comp
+                if(ball.y + ball.r > canvas.height || ball.y < 0 ){
+                    ball.velocityY = -ball.velocityY
+                }
+                else if(ball.x + ball.r > canvas.width || ball.x<0){
+                    resetBall()
+                    if(player == comp){
+                        user.score++
+                    }else{
+                        comp.score++
+                    }
+                }
+                let level = 0.1
+
+                comp.y += ( ball.y - ( comp.y + comp.h/2 )) * level
+                
+                if(collision(ball,player)){
+                    let intersectY = ball.y - (player.y + player.h/2) 
+                    intersectY /= player.h/2
+
+                    let maxBounceRate = Math.PI / 3
+                    let bounceAngle= intersectY * maxBounceRate
+                    let direction = (ball.x < canvas.width/2) ? 1 : -1
+
+                    ball.velocityX = direction * ball.speed * Math.cos(bounceAngle)
+                    ball.velocityY = ball.speed * Math.sin(bounceAngle)
+                    ball.speed+=0.5
+                }
+            }
+            const render = () => {
+                drawRect(0,0,canvas.width,canvas.height,"#00a98f");
+                drawRect(canvas.width/2 - 2,0,4,canvas.height,"white");
+                drawRect(canvas.width/2 - 2,canvas.height,4,canvas.height,"white");
+                drawCircleS(canvas.width/2,canvas.height/2 ,30,6,"white")
+                drawCircleF(canvas.width/2,canvas.height/2,8,"white")
+                drawText(user.score,canvas.width/4,50,"white");
+                drawText(comp.score,3*canvas.width/4,50,"white");
+
+                drawRect(user.x,user.y,user.w,user.h,user.color)
+                drawRect(comp.x,comp.y,comp.w,comp.h,comp.color)
+
+                drawCircleF(ball.x,ball.y,ball.r,ball.color);
+
+            }
+            const game = () => {
+                update()
+                render()
+            }
+            const fps = 50
+            setInterval(game,1000/50);
+        };
+    </script>
+</body>
+</html>
