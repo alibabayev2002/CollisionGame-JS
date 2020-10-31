@@ -16,33 +16,31 @@
     
     <script>
         window.onload = function() {
-            let canvas = document.querySelector('#game');
-            let context = canvas.getContext('2d');
-            // Oyun alanı
+            let canvas = document.querySelector('#game')
+            let context = canvas.getContext('2d')
             const drawRect = (x,y,w,h,color) => {
-                context.fillStyle = color;
-                context.fillRect(x,y,w,h);
+                context.fillStyle = color
+                context.fillRect(x,y,w,h)
             }
-            // drawRect(0,0,600,400,"green")
             const drawCircleF= (x,y,r,color) => {
-                context.fillStyle=color;
-                context.beginPath();
-                context.arc(x,y,r,0,2 * Math.PI,false);
-                context.closePath();
-                context.fill();
+                context.fillStyle=color
+                context.beginPath()
+                context.arc(x,y,r,0,2 * Math.PI,false)
+                context.closePath()
+                context.fill()
             }
             const drawCircleS= (x,y,r,w,color) => {
-                context.strokeStyle=color;
-                context.lineWidth = w;
-                context.beginPath();
-                context.arc(x,y,r,0,2 * Math.PI);
-                context.closePath();
-                context.stroke();
+                context.strokeStyle=color
+                context.lineWidth = w
+                context.beginPath()
+                context.arc(x,y,r,0,2 * Math.PI)
+                context.closePath()
+                context.stroke()
             }
             const drawText = (text,x,y,color) => {
-                context.fillStyle = color;
-                context.font = "50px arial";
-                context.fillText(text,x,y);
+                context.fillStyle = color
+                context.font = "50px arial"
+                context.fillText(text,x,y)
             }
 
             const user = {
@@ -62,7 +60,6 @@
                 score : 0,
                
             }
-
             const ball = {
                 x: canvas.width / 2,
                 y: canvas.height / 2,
@@ -75,7 +72,17 @@
             }
             const movePaddle = (e) => {
                 let rect = canvas.getBoundingClientRect();
-                user.y = e.clientY - rect.top - user.h/2
+                // console.log(e.clientY - rect.top);
+                if(e.clientY - rect.top - user.h/2>=0 && e.clientY - rect.top - user.h/2 < 300){
+                    user.y = e.clientY - rect.top - user.h/2;
+                }else if(e.clientY - rect.top - user.h/2<0){
+                    user.y = 0;
+                }else if(e.clientY - rect.top - user.h/2 > 300){
+                    user.y = 300;
+                }
+                // if(e.clientY - rect.top - user.h/2 - 50 >= 0){
+                //     user.y = e.clientY - rect.top - user.h/2 - 50;
+                // }
                 ball.stop = false
 
             }
@@ -121,9 +128,11 @@
                         comp.score++
                     }
                 }
-                let level = 0.1
+                let level = 0.2
+                if(comp.y + (ball.y - ( comp.y + comp.h/2 )) * level > 0 && comp.y+ ( ball.y - ( comp.y + comp.h/2 )) * level + comp.h < canvas.height){
+                    comp.y += ( ball.y - ( comp.y + comp.h/2 )) * level
 
-                comp.y += ( ball.y - ( comp.y + comp.h/2 )) * level
+                }
                 
                 if(collision(ball,player)){
                     let intersectY = ball.y - (player.y + player.h/2) 
@@ -158,7 +167,7 @@
                 render()
             }
             const fps = 50
-            setInterval(game,1000/50);
+            setInterval(game,1000/50)
         };
     </script>
 </body>
